@@ -65,6 +65,12 @@ sd(insurance$Children)
 
 Perform univariate analyses on the quantitative variables (center, shape, spread). Include descriptive statistics, and histograms. Be sure to use terms discussed in class such as bimodal, skewed left, etc.
 
+```{r}
+mean(insurance$Age)
+```
+```{r}
+median(insurance$Age)
+```
 
 ```{r}
 Age <- rnorm(50, mean = 41, sd = 16)
@@ -92,11 +98,6 @@ hist(BMI)
 ```{r}
 boxplot(BMI)
 ```
-
-# Question 2
-
-Perform bivariate analyses on the quantitative variables (direction, strength and form). Describe the linear association between all variables.
-
 ```{r}
 str(insurance)
 ```
@@ -112,6 +113,43 @@ summary(insurance)
 ```{r}
 sd(insurance$Charges)
 ```
+```{r}
+sd(insurance$Age)
+```
+```{r}
+sd(insurance$BMI)
+```
+```{r}
+sd(insurance$Children)
+```
+```{r}
+insurance %>%
+tbl_summary(statistic = list(all_continuous() ~ c("{mean} ({sd})",
+"{median} ({p25}, {p75})",
+"{min}, {max}"),
+all_categorical() ~ "{n} / {N} ({p}%)"),
+type = all_continuous() ~ "continuous2"
+)
+```
+
+# Question 2
+
+Perform bivariate analyses on the quantitative variables (direction, strength and form). Describe the linear association between all variables.
+```{r}
+cor(insurance)
+```
+```{r}
+corrplot(cor(insurance),
+type = "lower",
+order = "hclust",
+tl.col = "black",
+tl.srt = 45,
+addCoef.col = "black",
+diag = FALSE)
+```
+```{r}
+scatterplotMatrix(insurance)
+```
 
 # Question 3
 
@@ -120,7 +158,11 @@ Generate a regression equation in the following form:
 $$Charges = \beta_{0}+\beta_{1}*Age+\beta_{2}*BMI+\beta_{3}*Children$$
 
 ```{r q3}
-
+model <-lm(Charges ~ Age + BMI + Children, data = insurance)
+summary (model)
+```
+```{r}
+summ(model)
 ```
 
 also write out the regression cleanly in this document.
@@ -130,5 +172,12 @@ also write out the regression cleanly in this document.
 An eager insurance representative comes back with a potential client. The client is 40, their BMI is 30, and they have one dependent. Using the regression equation above, predict the amount of medical expenses associated with this policy. (Provide a 95% confidence interval as well)
 
 ```{r q4}
-
+newPrediction <- data.frame(Age = 40,
+BMI = 30,
+Children = 1)
+predict(model, newdata = newPrediction)
 ```
+```{r}
+model$coefficients["Age"]
+```
+
