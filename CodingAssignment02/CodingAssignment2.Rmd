@@ -1,6 +1,6 @@
 ---
 title: "Coding Assignment 2"
-author: "Team N"
+author: "Team 3"
 date: "Due: 2021-10-23 23:59"
 output: 
   html_document:
@@ -9,7 +9,10 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-#Put any packages you need here
+#Put any packages you need here*
+library(readr)
+library(readxl)
+library(car)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -40,17 +43,35 @@ Generate this regression equation:
 $$Charges = \beta_{0}+\beta_{1}*Age+\beta_{2}*BMI+\beta_{3}*Children + \beta_{4}*Female + \beta_{5}*Smoker + \beta_{6}*WinterSprings + \beta_{7}*WinterPark + \beta_{8}*Oviedo$$
 
 ```{r q1}
-model <-lm(Charges ~ Age + BMI + Children + Female + Smoker + WinterSprings + WinterPark + Oviedo, data = insurance)
+#model <-lm(Charges ~ Age + BMI + Children + Female + Smoker + WinterSprings + WinterPark + Oviedo, data = insurance)
+model <- lm(Charges ~ ., data = insurance)
 summary (model)
 ```
+Regression Equation
+
+$$Charges = -10309.09 + 161.29*Age + 448.06*BMI + 1319.85*Children - 328.59*Female + 28808.09*Smoker - 3080.73*WinterSprings - 6193.37*WinterPark - 3103.52*Oviedo$$
 
 Which independent variables test significant in a two-tailed test? Use $\alpha = 0.2$
 
+The following variables test as significant because P<0.2:
 
+Age              0.00575</br> 
+BMI              0.00559</br> 
+Children         0.05959</br>
+Smoker           2e-16</br>
+WinterSprings    0.18386</br> 
+WinterPark       0.00410</br>
+Oviedo           0.17485</br>
 
 ## Question 2
 
 Interpret the coefficients of all the independent variables that tested significant.
+
+Age, BMI, number of children, smoker, and cities were all independent variables that tested significant. Looking at the coefficients of each variable, this suggests that we have to reject our null hypothesis and conclude that these coefficients are significant. So, for age, as the primary beneficiary gets older, there is an increase in charge of about $162 dollars per year, give or take about $111.</br>
+For BMI, as the beneficiary’s body mass index increases by 1 kg/m2, there is an increase in charge of about $448, give or take $306.</br>
+For number of children a beneficiary has, the charge increases about $1320 per dependent, give or take $1362.</br>
+If a beneficiary is a smoker, this will increase their charge by $28,808, give or take $4,190.</br> 
+The city where a beneficiary lives is also significant. If a beneficiary lives in Winter Springs, it is about $3,081 cheaper, give or take $4,558 compared to Sanford. If a beneficiary lives in Winter Park, it is about $6,193 cheaper, give or take $4,073 compared to Sanford. If a beneficiary lives in Oviedo, it is about $3,104 cheaper, give or take $4,496 compared to Sanford.
 
 
 ## Question 3
@@ -67,15 +88,28 @@ The insurance agent returns with another client:
 Using the regression equation above, predict the amount of medical expenses associated with this policy. (Provide a 95% confidence interval as well)
 
 ```{r q3}
+newPrediction <- data.frame  (Age = 35, BMI = 26, Children = 1, Female = 1, Smoker = 0,
+                              WinterSprings = 0, WinterPark = 0, Oviedo = 0)
+predict(model,
+        newdata = newPrediction,
+        interval = "confidence",
+        level = .95)
 
 ```
+We predict, given the 95% confidence interval that the charges will $7977.16, with an upper limit of $11661.54 and a lower limit of $4292.77.
 
 ## Question 4
 
 Compare the model from question 1, to a model that does not include the group of city dummies. Does including the cities reduce the SSE by a statistically significant amount? (check the partial F-test for significance of the dummies as a group). Use $\alpha = 0.05$
 
 ```{r q4}
+model_reduced <- insurance[,-(7:9)]
+model_reduced <- lm(Charges ~., data = model_reduced)
+summary(model_reduced)
 
 ```
-
+```{r}
+anova(model_reduced, model)
+```
+Including the cities does reduce the SSE by a statistically significant amount. From our Analysis of Variance Table, we can see that the p value is .03445, which is less than .05. So, if our p value is lower than our α value, we can reject our null hypothesis and conclude significance with the reduced SSE value.
 
